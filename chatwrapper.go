@@ -3,6 +3,7 @@ package myai
 import (
 	"context"
 	"errors"
+	"fmt"
 	"io"
 	"log"
 	"strings"
@@ -261,7 +262,11 @@ func (c *FuncCallClient) dealToolCalls(ctx context.Context, tm *ToolCallReq, ch 
 			res string
 		)
 
-		res, err = calls2[call.Function.Name].CallFn(ctx, NewArgs(call.Function.Arguments), ch)
+		c2, ok := calls2[call.Function.Name]
+		if !ok {
+			return fmt.Errorf("no such tool call %q body %q", call.Function.Name, call.Function.Arguments)
+		}
+		res, err = c2.CallFn(ctx, NewArgs(call.Function.Arguments), ch)
 		if err != nil {
 			res = err.Error()
 		}
