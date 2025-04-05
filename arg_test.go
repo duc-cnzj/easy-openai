@@ -1,6 +1,8 @@
 package myai
 
-import "testing"
+import (
+	"testing"
+)
 
 func TestNewArgs(t *testing.T) {
 	args := NewArgs(`{"name": ["duc", "abc"], "age": 1}`)

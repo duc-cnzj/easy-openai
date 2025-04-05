@@ -255,6 +255,16 @@ func (c *FuncCallClient) dealToolCalls(ctx context.Context, tm *ToolCallReq, ch 
 		Role:      openai.ChatMessageRoleAssistant,
 		ToolCalls: toolCalls,
 	})
+	ch <- &openai.ChatCompletionStreamResponse{
+		Choices: []openai.ChatCompletionStreamChoice{
+			{
+				Delta: openai.ChatCompletionStreamChoiceDelta{
+					Role:      openai.ChatMessageRoleAssistant,
+					ToolCalls: toolCalls,
+				},
+			},
+		},
+	}
 
 	callFn := func(ctx context.Context, call openai.ToolCall) error {
 		var (
@@ -269,6 +279,20 @@ func (c *FuncCallClient) dealToolCalls(ctx context.Context, tm *ToolCallReq, ch 
 		res, err = c2.CallFn(ctx, NewArgs(call.Function.Arguments), ch)
 		if err != nil {
 			res = err.Error()
+		}
+
+		ch <- &openai.ChatCompletionStreamResponse{
+			Choices: []openai.ChatCompletionStreamChoice{
+				{
+					Delta: openai.ChatCompletionStreamChoiceDelta{
+						Role:    openai.ChatMessageRoleTool,
+						Content: res,
+						ToolCalls: []openai.ToolCall{
+							call,
+						},
+					},
+				},
+			},
 		}
 		tm.AddMessage(openai.ChatCompletionMessage{
 			Role:       openai.ChatMessageRoleTool,
