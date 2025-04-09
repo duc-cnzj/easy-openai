@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"io"
 	"log"
+	"slices"
 	"strings"
 	"sync"
 
@@ -105,6 +106,7 @@ type ToolCallReq struct {
 }
 
 func NewToolCallReq(req openai.ChatCompletionRequest) *ToolCallReq {
+	req.Messages = slices.Clone(req.Messages)
 	return &ToolCallReq{req: &req}
 }
 
